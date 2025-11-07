@@ -1,12 +1,13 @@
 
 import mysql.connector
 from mysql.connector import Error
+import os
 
-HOST = "35.238.159.19"
-USER = "root"
-PASSWORD = "Tubby101."
-DATABASE = "music_data_explorer"
-PORT = 3306
+HOST=os.getenv("HOST")
+USER=os.getenv("USER")
+PASSWORD=os.getenv("PASSWORD")
+DATABASE=os.getenv("DATABASE")
+PORT=os.getenv("PORT")
 
 try:
     conn = mysql.connector.connect(
