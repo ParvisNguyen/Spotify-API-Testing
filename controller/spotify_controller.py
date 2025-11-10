@@ -1,63 +1,52 @@
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
+from tabulate import tabulate
 import os
 from dotenv import load_dotenv
-# Import tabulate to display data in a table format
-from tabulate import tabulate
+from model.database import DatabaseConnection
 
-# Load environment variables from .env file
 load_dotenv()
 
-# Authentication Setup
-sp = spotipy.Spotify(auth_manager=SpotifyClientCredentials(
-    client_id=os.getenv("SPOTIPY_CLIENT_ID"),
-    client_secret=os.getenv("SPOTIPY_CLIENT_SECRET")
-))
+class SpotifyController:
+    # Handles artist search and Spotify API communication.
+    def __init__(self):
+        # Initialize Spotify client
+        self.sp = spotipy.Spotify(auth_manager=SpotifyClientCredentials(
+            client_id=os.getenv("SPOTIPY_CLIENT_ID"),
+            client_secret=os.getenv("SPOTIPY_CLIENT_SECRET")
+        ))
+        # Connect to the database
+        self.db = DatabaseConnection()
 
-while True:
-# Searches for an artist in a query
-# q is the search query
-# type is the type of item to search for
-    search_query = input("Enter an artist or type 'exit' to exit: ").strip()
-    result = sp.search(q=search_query, type="artist")
-    
-    # Exit the program if the user types 'exit'
-    if search_query.lower () == 'exit':
-        break
+    def search_artist(self, artist_name):
+        # Search an artist and fetch top tracks.
+        result = self.sp.search(q=artist_name, type="artist")
+        if result['artists']['items']:
+            artist = result['artists']['items'][0]
+            artist_id = artist['id']
+            artist_name = artist['name']
+            followers = artist['followers']['total']
+            genres = artist['genres']
+            popularity = artist['popularity']
+            top_tracks = self.sp.artist_top_tracks(artist_id)['tracks']
 
-#Checks if there is an artist found
-    if result['artists']['items']:
-    
-# Extract artist info
-# result is a dictionary returned by sp.search()
-# 'artist' contains artists found in the search query
-# 'items' contains the list of artists found
-# [0] is used to get the first artist in the list
-        artist = result['artists']['items'][0]
-        artist_id = artist['id']
-        artist_name = artist['name']    
-        followers = artist['followers']['total']
-        genres = artist['genres']
-        popularity = artist['popularity']
+            # Store search in DB
+            self.db.insert_artist(artist_name)
 
-# Extract and display artist info
-        print(f"\n🎵 Artist: {artist_name}")
-        print(f"👥 Followers: {followers}")
-# Checks if genres is not empty, if it is then it will print 'No genres available'
-        print(f"🎼 Genre(s): {', '.join(genres) if genres else 'No genres available'}")
-        print(f"🔥 Popularity: {popularity}/100")
+            # Build table of top tracks
+            track_data = [[t['name'], t['album']['name'], t['popularity']] for t in top_tracks]
 
-# Takes top tracks of artist
-        top_tracks = sp.artist_top_tracks(artist_id)['tracks']
+            # Return data to view
+            return {
+                "name": artist_name,
+                "followers": followers,
+                "genres": genres,
+                "popularity": popularity,
+                "tracks": track_data
+            }
+        else:
+            return None
 
-# Extract track details
-        track_data=[]
-        for track in top_tracks:
-            track_data.append([track['name'], track['album']['name'], track['popularity']])
-    
-        print("\n🎵 Top Tracks:")
-        print(tabulate(track_data, headers=['Track', 'Album', 'Popularity'], tablefmt='pretty'))
-
-    else:
-        print (f"No Aritst found for the query: '{search_query}'.")
-        
+    def get_search_history(self):
+        # Return the most recent artist searches.
+        return self.db.fetch_history()
