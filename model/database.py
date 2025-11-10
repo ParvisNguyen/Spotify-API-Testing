@@ -36,7 +36,7 @@ class DatabaseConnection:
         return cls._instance
 
     def insert_artist(self, artist_name):
-        """Insert artist search history into the database."""
+        # Insert artist search history into the database.
         try:
             query = "INSERT INTO search_history (artist_name) VALUES (%s);"
             self.cursor.execute(query, (artist_name,))
@@ -45,7 +45,7 @@ class DatabaseConnection:
             print("Insert error:", e)
 
     def fetch_history(self, limit=10):
-        """Fetch recent artist searches."""
+        # Fetch recent artist searches.
         self.cursor.execute("""
             SELECT id, artist_name, search_time 
             FROM search_history 
@@ -54,6 +54,6 @@ class DatabaseConnection:
         return self.cursor.fetchall()
 
     def close(self):
-        """Close database connection."""
+        # Close database connection.
         self.cursor.close()
         self.conn.close()
