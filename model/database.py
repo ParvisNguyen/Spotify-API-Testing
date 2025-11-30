@@ -19,7 +19,7 @@ class DatabaseConnection:
                     user=os.getenv("USER"),
                     password=os.getenv("PASSWORD"),
                     database=os.getenv("DATABASE"),
-                    port=os.getenv("POR T")
+                    port=os.getenv("PORT")
                 )
                 cls._instance.cursor = cls._instance.conn.cursor()
                 cls._instance.cursor.execute("""

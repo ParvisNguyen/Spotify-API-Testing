@@ -1,0 +1,4 @@
+spotipy
+tabulate
+python-dotenv
+mysql-connector-python

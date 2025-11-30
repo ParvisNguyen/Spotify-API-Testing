@@ -1,7 +1,7 @@
 from tabulate import tabulate
 
 class ConsoleView:
-    """Handles all text and table display for the user."""
+    # Handles all text and table display for the user.
     
     @staticmethod
     def display_artist_info(artist_data):
