@@ -15,11 +15,11 @@ class DatabaseConnection:
             cls._instance = super(DatabaseConnection, cls).__new__(cls)
             try:
                 cls._instance.conn = mysql.connector.connect(
-                    host=os.getenv("HOST"),
-                    user=os.getenv("USER"),
-                    password=os.getenv("PASSWORD"),
-                    database=os.getenv("DATABASE"),
-                    port=os.getenv("PORT")
+                    host=os.getenv("DB_HOST"),
+                    user=os.getenv("DB_USER"),
+                    password=os.getenv("DB_PASSWORD"),
+                    database=os.getenv("DB_DATABASE"),
+                    port=os.getenv("DB_PORT")
                 )
                 cls._instance.cursor = cls._instance.conn.cursor()
                 cls._instance.cursor.execute("""
